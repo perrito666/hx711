@@ -186,7 +186,7 @@ func (d *Device) Calibrate(weightInGrams float64) (float64, error) {
 		return 0, fmt.Errorf("weight needs to be > 0")
 	}
 	weight := weightInGrams * 1000
-	newCF := (float64(toInt64(d.read())) * d.calibrationFactor) / weight
+	newCF := weight / (float64(toInt64(d.read())) * d.calibrationFactor)
 	if newCF == 0 {
 		return 0, fmt.Errorf("resulting calibration factor would be 0")
 	}
