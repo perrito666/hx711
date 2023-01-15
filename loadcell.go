@@ -137,6 +137,16 @@ func (d *Device) Read() int64 {
 	return toInt64(avg(d.smoothingFactor, d.read)) - d.offset - d.tare
 }
 
+// ReadCalibrated performs avg of <SmoothingFactor> reads and returns that, adjusted for offset, tare and calibration.
+// accuracy lost is intentional
+func (d *Device) ReadCalibrated() int64 {
+	d.opMutex.Lock()
+	defer d.opMutex.Unlock()
+	offset := float64(d.offset) * d.calibrationFactor
+	tare := float64(d.tare) * d.calibrationFactor
+	return int64(float64(toInt64(avg(d.smoothingFactor, d.read)))*d.calibrationFactor - offset - tare)
+}
+
 // Tare performs ... well.. tare? https://en.wikipedia.org/wiki/Tare_weight
 func (d *Device) Tare() {
 	d.opMutex.Lock()
