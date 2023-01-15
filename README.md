@@ -22,7 +22,7 @@ import (
 // Instantiate a device, this should be thread safe but don't push it
 // 100 is a good smoothing factor, it is the number of reads that will be made in raw per Read call
 // and averaged.
-dev := hx711.New(machine.D4, machine.D5, hx711.Gain128, 100)
+dev := hx711.New(machine.D4, machine.D5, hx711.Gain128, 100, 400) // in millis, is a good time to wait for the device
 
 // the device is ready to use but i recommend calibrating:
 // Once the device has been instantiated (that is a blocking call)
@@ -33,7 +33,7 @@ dev.Calibrate(100.10) // weight in grams
 
 // Finally get a read
 weight := dev.Read()
-fmt.Printf("whatever is on the scale is %d centigrams", weight)
+fmt.Printf("whatever is on the scale is %d milligrams", weight)
 
 ```
 

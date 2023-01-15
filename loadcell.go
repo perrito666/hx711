@@ -50,7 +50,7 @@ type Device struct {
 }
 
 func toInt64(u uint32) int64 {
-	return int64(u<<8) >> 8
+	return int64(int32(u<<8)) >> 8
 }
 
 func avg(times int, f func() uint32) uint32 {
@@ -75,9 +75,12 @@ func avg(times int, f func() uint32) uint32 {
 
 // New returns a device configured and initialized with the passed ports
 // if the device is not appropriately connected this might hang
-func New(sck SCK, dt DT, gain gainLVL, smoothingFactor int) *Device {
+func New(sck SCK, dt DT, gain gainLVL, smoothingFactor int, settlingWait int) *Device {
 	d := &Device{sck: sck, dt: dt, smoothingFactor: smoothingFactor, calibrationFactor: 1}
 	d.SetGainAndChannel(gain)
+	if settlingWait > 0 {
+		time.Sleep(time.Duration(settlingWait) * time.Millisecond)
+	}
 	// subsequent setting of gain happens in the read
 	d.setGainAndChannel()
 	for {
@@ -139,6 +142,9 @@ func (d *Device) Tare() {
 	d.opMutex.Lock()
 	defer d.opMutex.Unlock()
 	d.tare = toInt64(avg(d.smoothingFactor, d.read)) - d.offset
+	if d.tare < 0 { // this was a tare on a small value
+		d.tare = 0
+	}
 }
 
 // Zero re-sets offset and tare for the load cell.
@@ -179,7 +185,7 @@ func (d *Device) Calibrate(weightInGrams float64) (float64, error) {
 	if weightInGrams == 0 {
 		return 0, fmt.Errorf("weight needs to be > 0")
 	}
-	weight := weightInGrams * 100
+	weight := weightInGrams * 1000
 	newCF := (float64(toInt64(d.read())) * d.calibrationFactor) / weight
 	if newCF == 0 {
 		return 0, fmt.Errorf("resulting calibration factor would be 0")
