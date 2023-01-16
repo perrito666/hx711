@@ -51,7 +51,7 @@ func TestDevice_Calibrate(t *testing.T) {
 	dtp := &counterDataPin{}
 	var someBbits []uint32
 	for i := 0; i < 20; i++ {
-		someBbits = append(someBbits, 50000+uint32(i))
+		someBbits = append(someBbits, 500000+uint32(i))
 	}
 	dtp.loadBits(someBbits, false)
 	td := Device{
@@ -66,7 +66,7 @@ func TestDevice_Calibrate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cal1 := 1.0101010101
+	cal1 := 0.9900000000
 	// yes, this is a hack but much more understandable and easier that starting shifting bits again.
 	if fmt.Sprintf("%.10f", v) != fmt.Sprintf("%.10f", cal1) {
 		t.Logf("calibration result expected to be %.10f but is %.10f", cal1, v)
@@ -76,7 +76,7 @@ func TestDevice_Calibrate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cal2 := 1.0182673509
+	cal2 := 1.0020181980
 	if fmt.Sprintf("%.10f", v) != fmt.Sprintf("%.10f", cal2) {
 		t.Logf("calibration result n2 expected to be %.10f but is %.10f", cal2, v)
 		t.FailNow()
